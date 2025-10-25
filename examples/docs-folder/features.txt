@@ -1,0 +1,29 @@
+MyApp Features
+==============
+
+Application URL: http://localhost:3000
+
+Core Features:
+- User registration and login
+- Dashboard with activity feed
+- Project management
+- Task tracking
+- Team collaboration
+- File uploads
+- Notifications
+
+Main Pages:
+/
+/login
+/signup
+/dashboard
+/projects
+/projects/new
+/projects/:id
+/tasks
+/settings
+/profile
+
+Test Account:
+Email: demo@example.com
+Password: demopass123

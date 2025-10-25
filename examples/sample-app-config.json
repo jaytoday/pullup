@@ -1,0 +1,75 @@
+{
+  "name": "mystore",
+  "url": "http://localhost:3000",
+  "credentials": {
+    "test_user": {
+      "email": "test@example.com",
+      "password": "testpass123",
+      "note": "Test user for automated testing"
+    },
+    "admin_user": {
+      "email": "admin@example.com",
+      "password": "adminpass123",
+      "note": "Administrator account"
+    }
+  },
+  "features": [
+    {
+      "name": "Product Browsing",
+      "url": "/products",
+      "description": "Browse and search product catalog",
+      "testable": true
+    },
+    {
+      "name": "Shopping Cart",
+      "url": "/cart",
+      "description": "Add, remove, and update cart items",
+      "testable": true
+    },
+    {
+      "name": "Checkout Flow",
+      "url": "/checkout",
+      "description": "Complete purchase with payment",
+      "testable": true,
+      "requiresAuth": true
+    },
+    {
+      "name": "User Profile",
+      "url": "/profile",
+      "description": "View and edit user profile",
+      "testable": true,
+      "requiresAuth": true
+    }
+  ],
+  "pages": [
+    "/",
+    "/about",
+    "/products",
+    "/products/categories",
+    "/cart",
+    "/checkout",
+    "/login",
+    "/signup",
+    "/profile",
+    "/orders",
+    "/contact"
+  ],
+  "exploration": {
+    "maxDepth": 3,
+    "maxPages": 50,
+    "timeout": 30000,
+    "waitForNetworkIdle": true,
+    "followExternalLinks": false
+  },
+  "analysis": {
+    "detectFramework": true,
+    "captureScreenshots": true,
+    "analyzeAccessibility": false
+  },
+  "notes": [
+    "This is a sample configuration for a fictional e-commerce application",
+    "Customize this template for your own application",
+    "Remove the credentials section or use placeholder values",
+    "Add specific pages you want to ensure are discovered"
+  ]
+}

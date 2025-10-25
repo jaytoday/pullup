@@ -1,0 +1,24 @@
+{
+  "name": "pullup-skill",
+  "version": "1.0.0",
+  "description": "Higher-order skill that generates application-specific testing skills for web applications",
+  "main": "execute.js",
+  "scripts": {
+    "setup": "npm install && npx playwright install chromium"
+  },
+  "keywords": [
+    "testing",
+    "automation",
+    "skill-generator",
+    "playwright",
+    "web-testing",
+    "application-testing"
+  ],
+  "dependencies": {
+    "playwright": "^1.48.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "license": "MIT"
+}
