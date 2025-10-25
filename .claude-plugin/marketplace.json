@@ -1,0 +1,32 @@
+{
+  "name": "pullup",
+  "owner": {
+    "name": "jaytoday",
+    "email": "github@jaytoday"
+  },
+  "metadata": {
+    "description": "Claude Code Skill for generating application-specific testing skills for web applications. PullUp explores your application, maps its structure, and creates a custom skill that already knows your app's pages, forms, and workflows.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "pullup",
+      "version": "1.0.0",
+      "description": "Claude Code Skill for generating application-specific testing skills for web applications. PullUp explores your application, maps its structure, and creates a custom skill that already knows your app's pages, forms, and workflows.",
+      "author": {
+        "name": "jaytoday"
+      },
+      "license": "MIT",
+      "repository": "https://github.com/jaytoday/pullup",
+      "keywords": [
+        "automation",
+        "browser-automation",
+        "claude-code",
+        "claude-skill",
+        "e2e",
+        "playwright",
+        "testing"
+      ]
+    }
+  ]
+}
