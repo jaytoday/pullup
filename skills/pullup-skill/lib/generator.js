@@ -101,6 +101,12 @@ ${this.generateFlowsSection()}
 
 ${this.generateScenariosSection()}
 
+## Playwright Script Excerpts
+
+The following are ready-to-execute Playwright scripts for common interactions. These scripts can be run directly or modified for specific test cases.
+
+${this.generatePlaywrightScripts()}
+
 ## Test Patterns
 
 This skill includes pre-configured test patterns in \`test-patterns.js\`:
@@ -562,6 +568,198 @@ Generated: ${new Date().toISOString().split('T')[0]}
     }
 
     return output;
+  }
+
+  /**
+   * Generate Playwright script excerpts for common interactions
+   */
+  generatePlaywrightScripts() {
+    let scripts = '';
+
+    // Add login script if login form exists
+    const loginForm = this.analysis.forms.find(f => f.pattern === 'login');
+    if (loginForm) {
+      scripts += this.generateLoginScript(loginForm);
+    }
+
+    // Add navigation test script
+    if (Object.values(this.analysis.pages).flat().length > 0) {
+      scripts += this.generateNavigationScript();
+    }
+
+    // Add form interaction script if other forms exist
+    const otherForms = this.analysis.forms.filter(f => f.pattern !== 'login');
+    if (otherForms.length > 0) {
+      scripts += this.generateFormScript(otherForms[0]);
+    }
+
+    return scripts || 'No script excerpts generated.\n';
+  }
+
+  /**
+   * Generate login script excerpt
+   */
+  generateLoginScript(loginForm) {
+    const emailField = loginForm.fields.find(f =>
+      (f.name && f.name.includes('email')) ||
+      (f.type === 'email')
+    );
+    const passwordField = loginForm.fields.find(f =>
+      (f.name && f.name.includes('password')) ||
+      (f.type === 'password')
+    );
+
+    const emailSelector = emailField ? `input[name="${emailField.name}"]` : 'input[type="email"]';
+    const passwordSelector = passwordField ? `input[name="${passwordField.name}"]` : 'input[type="password"]';
+    const submitSelector = loginForm.submitSelector || 'button[type="submit"]';
+
+    return `
+### Login Flow
+
+**Playwright Script:**
+\`\`\`javascript
+// Login to ${this.appName}
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: false });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+    // Navigate to login page
+    await page.goto('${this.analysis.baseUrl}${loginForm.pageUrl || '/login'}');
+    console.log('📄 Navigated to login page');
+
+    // Fill login form
+    await page.fill('${emailSelector}', 'test@example.com');
+    await page.fill('${passwordSelector}', 'your-password');
+    console.log('📝 Filled login credentials');
+
+    // Submit form
+    await page.click('${submitSelector}');
+    console.log('🔘 Submitted login form');
+
+    // Wait for navigation (adjust URL pattern as needed)
+    await page.waitForURL('**/dashboard', { timeout: 5000 }).catch(() => {
+      console.log('⚠️  Navigation timeout - check if redirect URL is correct');
+    });
+
+    console.log('✅ Login successful');
+  } catch (error) {
+    console.error('❌ Login failed:', error.message);
+  } finally {
+    await browser.close();
+  }
+})();
+\`\`\`
+
+**Usage Notes:**
+- Replace \`test@example.com\` and \`your-password\` with actual test credentials
+- Adjust the \`waitForURL\` pattern to match your app's post-login redirect
+- Selectors: \`${emailSelector}\`, \`${passwordSelector}\`, \`${submitSelector}\`
+
+`;
+  }
+
+  /**
+   * Generate navigation script excerpt
+   */
+  generateNavigationScript() {
+    const pages = Object.values(this.analysis.pages).flat();
+    const samplePages = pages.slice(0, 3);
+
+    return `
+### Page Navigation
+
+**Playwright Script:**
+\`\`\`javascript
+// Navigate through ${this.appName} pages
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: false });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+${samplePages.map(p => `    // Navigate to ${p.name}
+    await page.goto('${this.analysis.baseUrl}${p.path}');
+    await page.waitForLoadState('networkidle');
+    console.log('✅ ${p.name} loaded successfully');
+`).join('\n')}
+  } catch (error) {
+    console.error('❌ Navigation failed:', error.message);
+  } finally {
+    await browser.close();
+  }
+})();
+\`\`\`
+
+**Available Pages:**
+${samplePages.map(p => `- ${p.name}: \`${p.path}\``).join('\n')}
+${pages.length > 3 ? `\n...and ${pages.length - 3} more pages` : ''}
+
+`;
+  }
+
+  /**
+   * Generate form interaction script excerpt
+   */
+  generateFormScript(form) {
+    const fieldExamples = form.fields.slice(0, 3).map(field => {
+      const selector = field.name ? `input[name="${field.name}"]` :
+                      field.id ? `#${field.id}` :
+                      `input[type="${field.type}"]`;
+      const testValue = form.testData && form.testData[field.name] ?
+                       form.testData[field.name] :
+                       'test-value';
+      return { selector, field: field.name || field.id || field.type, testValue };
+    });
+
+    return `
+### ${this.capitalize(form.pattern)} Form
+
+**Playwright Script:**
+\`\`\`javascript
+// Fill and submit ${form.pattern} form in ${this.appName}
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: false });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+    // Navigate to form page
+    await page.goto('${this.analysis.baseUrl}${form.pageUrl || '/'}');
+    console.log('📄 Navigated to ${form.pattern} form');
+
+    // Fill form fields
+${fieldExamples.map(f => `    await page.fill('${f.selector}', '${f.testValue}');
+    console.log('✓ Filled ${f.field}');`).join('\n')}
+
+    // Submit form
+    await page.click('${form.submitSelector || 'button[type="submit"]'}');
+    console.log('🔘 Submitted form');
+
+    // Wait for response
+    await page.waitForLoadState('networkidle');
+    console.log('✅ Form submission complete');
+  } catch (error) {
+    console.error('❌ Form submission failed:', error.message);
+  } finally {
+    await browser.close();
+  }
+})();
+\`\`\`
+
+**Form Details:**
+- Pattern: ${form.pattern}
+- Fields: ${form.fieldCount}
+- Method: ${form.method.toUpperCase()}
+
+`;
   }
 
   /**

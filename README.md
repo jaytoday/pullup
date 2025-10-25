@@ -72,9 +72,28 @@ This results in being able to more easily invoke Playwright testing for your app
 
 ### Setup
 
+**Option A: Install from Marketplace (Recommended)**
+
+1. Add skill from marketplace:
+   ```bash
+   /plugin marketplace add jaytoday/pullup
+   ```
+
+2. Install the plugin:
+   ```bash
+   /plugin install pullup@pullup-skill
+   ```
+
+3. Complete setup (install Playwright and Chromium):
+   ```bash
+   cd ~/.claude/plugins/marketplaces/pullup/skills/pullup-skill
+   npm run setup
+   ```
+
+**Option B: Clone Repository**
+
 1. Clone or download this repository
 2. Navigate to the skill directory:
-
    ```bash
    cd pullup/skills/pullup-skill
    ```
@@ -84,25 +103,28 @@ This results in being able to more easily invoke Playwright testing for your app
    npm run setup
    ```
 
-This installs Playwright and Chromium. Only needed once.
+Setup only needs to be run once. It installs Playwright and Chromium browser.
 
 ## Quick Start
 
 ### Step 1: Create a Testing Skill
 
-**Option A: With Documentation (Recommended)**
+**Recommended Approach: Use Documentation**
 
-Create a simple documentation file `app-info.md`:
+Create a simple documentation file (e.g., `app-info.md`):
 
 ```markdown
 # MyApp
+
 http://localhost:3000
 
 ## Features
+
 - Login: /login
 - Dashboard: /dashboard
 
 ## Test User
+
 email: test@example.com
 password: testpass123
 ```
@@ -114,23 +136,23 @@ cd skills/pullup-skill
 node execute.js --name myapp --docs app-info.md
 ```
 
-Or use an entire documentation folder:
+**Use an entire documentation folder:**
 
 ```bash
 node execute.js --name myapp --docs ./docs
 ```
 
-**Option B: Just URL**
-
-```bash
-node execute.js --name myapp --url http://localhost:3000
-```
-
-**Option C: With Guidance**
+**Add guidance with --prompt:**
 
 ```bash
 node execute.js --name myapp --docs ./docs \
   --prompt "Focus on admin features, they're most important"
+```
+
+**Alternative: Just URL** (if no documentation available)
+
+```bash
+node execute.js --name myapp --url http://localhost:3000
 ```
 
 PullUp will:
@@ -185,11 +207,13 @@ Create a file like `app-info.md`:
 Application runs at http://localhost:3000
 
 ## Features
+
 - User login at /login
 - Dashboard at /dashboard
 - Product catalog at /products
 
 ## Test Credentials
+
 - Email: test@example.com
 - Password: testpass123
 ```
@@ -208,6 +232,7 @@ node execute.js --name myapp --docs ./project-docs
 ```
 
 PullUp automatically extracts:
+
 - URLs (http://... or localhost:...)
 - Page paths (starting with /)
 - Credentials (email/password patterns)
@@ -238,30 +263,31 @@ The prompt helps PullUp understand what's important in your documentation and ap
 
 ### Command Line Options
 
+**Primary Usage:**
 ```bash
-# Basic usage
-node execute.js --name <appname> --url <url>
-
-# With documentation file (recommended)
+# Recommended: With documentation
 node execute.js --name <appname> --docs <file-or-folder>
 
-# With instructions/prompt
-node execute.js --name <appname> --docs ./docs --prompt "Focus on admin features"
+# With guidance prompt
+node execute.js --name <appname> --docs <path> --prompt "Focus on admin features"
 
 # Update existing skill
 node execute.js --name <appname> --update
+```
 
+**Additional Options:**
+```bash
 # Custom output directory
-node execute.js --name myapp --url http://localhost:3000 --output ./my-skills
-
-# Control exploration depth
-node execute.js --name myapp --url http://localhost:3000 --max-depth 5 --max-pages 100
+node execute.js --name myapp --docs ./docs --output ./my-skills
 
 # Verbose output
-node execute.js --name myapp --url http://localhost:3000 --verbose
+node execute.js --name myapp --docs ./docs --verbose
 
-# With extensions (future feature)
-node execute.js --name myapp --url http://localhost:3000 --extensions security,accessibility
+# Advanced: Control exploration depth
+node execute.js --name myapp --docs ./docs --max-depth 5 --max-pages 100
+
+# Fallback: Just URL (if no documentation)
+node execute.js --name myapp --url http://localhost:3000
 ```
 
 ### Help
@@ -330,7 +356,7 @@ Let's walk through a complete example with a todo application:
 
 ```bash
 cd skills/pullup-skill
-node execute.js --name todoapp --url http://localhost:3000
+node execute.js --name todoapp --docs ./todoapp-docs
 ```
 
 Output:

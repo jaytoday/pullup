@@ -148,47 +148,63 @@ function displayHelp() {
 PullUp - Application Testing Skill Generator
 
 Usage:
-  node execute.js [options]
+  node execute.js --name <appname> --docs <path> [options]
 
-Options:
+Primary Options:
   -n, --name <name>          Application name (required)
-  -u, --url <url>            Application URL (required unless using --docs)
-  -d, --docs <path>          Path to documentation file or folder (txt, md, etc.)
-  --info <path>              Alias for --docs
-  -p, --prompt <text>        Additional instructions or context for exploration
-  --instructions <text>      Alias for --prompt
+  -d, --docs <path>          Path to documentation file or folder (recommended)
+                             PullUp extracts URLs, credentials, features, pages automatically
+  -p, --prompt <text>        Instructions or guidance for exploration
+                             Use to focus on specific features or provide context
+
+Additional Options:
+  -u, --url <url>            Explicit URL (optional if provided via --docs)
   --update                   Update existing skill instead of creating new one
-  -o, --output <dir>         Output directory for generated skill (default: ~/.claude/skills)
-  -e, --extensions <list>    Comma-separated list of extensions (e.g., security,accessibility)
-  --max-depth <n>            Maximum crawl depth (default: 3)
-  --max-pages <n>            Maximum pages to explore (default: 50)
+  -o, --output <dir>         Output directory (default: ~/.claude/skills)
   -v, --verbose              Enable verbose logging
   -h, --help                 Display this help message
 
-Examples:
-  # Create new skill with just name and URL
-  node execute.js --name myapp --url http://localhost:3000
+Advanced Options:
+  --max-depth <n>            Maximum crawl depth (default: 3)
+  --max-pages <n>            Maximum pages to explore (default: 50)
 
-  # With documentation file
-  node execute.js --name myapp --url http://localhost:3000 --docs app-info.md
+Examples:
+  # Recommended: With documentation file
+  node execute.js --name myapp --docs app-info.md
 
   # With documentation folder (reads all text files recursively)
-  node execute.js --name myapp --url http://localhost:3000 --docs ./docs
+  node execute.js --name myapp --docs ./docs
 
-  # With prompt to guide exploration
-  node execute.js --name myapp --docs ./docs --prompt "Focus on the admin features in the /docs/admin folder"
+  # With guidance prompt
+  node execute.js --name myapp --docs ./docs --prompt "Focus on admin features"
 
-  # Auto-detect URL from documentation
-  node execute.js --name myapp --docs ./project-docs
+  # Documentation + explicit URL
+  node execute.js --name myapp --docs ./docs --url http://localhost:3000
+
+  # Just URL (if no documentation available)
+  node execute.js --name myapp --url http://localhost:3000
 
   # Update existing skill
   node execute.js --name myapp --update
 
-  # With extensions
-  node execute.js --name myapp --url http://localhost:3000 --extensions security
+Documentation Format:
+  PullUp automatically extracts from your docs:
+  - URLs (http://localhost:3000, etc.)
+  - Page paths (/login, /dashboard, etc.)
+  - Credentials (test@example.com, passwords)
+  - Features (from headings and bullet points)
 
-  # Custom exploration limits
-  node execute.js --name myapp --url http://localhost:3000 --max-depth 5 --max-pages 100
+  Example doc (myapp-info.md):
+    # MyApp
+    Runs at: http://localhost:3000
+
+    ## Features
+    - Login: /login
+    - Dashboard: /dashboard
+
+    ## Test Account
+    Email: test@example.com
+    Password: testpass123
 `);
 }
 

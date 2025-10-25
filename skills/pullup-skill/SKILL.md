@@ -10,6 +10,7 @@ tags: [testing, automation, skill-generator, meta-skill, web-testing]
 This skill can be installed in different locations. Before executing commands, determine the skill directory based on where you loaded this SKILL.md file, and use that path in all commands below. Replace `$SKILL_DIR` with the actual discovered path.
 
 Common installation paths:
+
 - Plugin system: `~/.claude/plugins/marketplaces/pullup/skills/pullup-skill`
 - Manual global: `~/.claude/skills/pullup-skill`
 - Project-specific: `<project>/.claude/skills/pullup-skill`
@@ -50,16 +51,19 @@ This installs Playwright and Chromium browser. Only needed once.
 The easiest way to use PullUp is to provide your existing project documentation. PullUp automatically extracts URLs, credentials, pages, features, and more.
 
 **From a single file:**
+
 ```
 "Use PullUp to create a testing skill from README.md for myapp"
 ```
 
 **From a documentation folder:**
+
 ```
 "Create testing skill for myapp using docs from ./project-docs folder"
 ```
 
 **With guidance:**
+
 ```
 "Create testing skill for myapp from ./docs folder.
 Focus on the admin features - they're the most important to test."
@@ -77,26 +81,31 @@ Create a file like `myapp-info.md`:
 Runs at: http://localhost:3000
 
 ## Features
+
 - Login page: /login
 - Dashboard: /dashboard
 - Settings: /settings
 
 ## Test Account
+
 Email: test@example.com
 Password: testpass123
 ```
 
 Then:
+
 ```
 "Use PullUp to create a testing skill from myapp-info.md for myapp"
 ```
 
 **Or use a documentation folder:**
+
 ```
 "Create testing skill for myapp using docs from ./project-docs folder"
 ```
 
 PullUp reads all `.txt`, `.md`, and `.markdown` files recursively and extracts:
+
 - ✅ Application URLs (http://localhost:3000, etc.)
 - ✅ Page paths (/login, /dashboard, /products, etc.)
 - ✅ Credentials (test emails and passwords)
@@ -123,20 +132,20 @@ PullUp will re-explore and merge new findings with existing knowledge.
 
 ## Execution Pattern
 
-**Step 1: Provide documentation or URL**
+**Step 1: Provide documentation (recommended) or URL**
 
 ```bash
-# With documentation (recommended)
+# Recommended: With documentation file
 cd $SKILL_DIR && node execute.js --name myapp --docs ./README.md
 
-# With documentation folder
+# With documentation folder (reads all text files recursively)
 cd $SKILL_DIR && node execute.js --name myapp --docs ./docs
 
-# With guidance
+# With guidance prompt to focus exploration
 cd $SKILL_DIR && node execute.js --name myapp --docs ./docs \
   --prompt "Focus on admin features"
 
-# Just URL
+# Alternative: Just URL (if no documentation available)
 cd $SKILL_DIR && node execute.js --name myapp --url http://localhost:3000
 
 # Update existing skill
@@ -146,6 +155,7 @@ cd $SKILL_DIR && node execute.js --name myapp --update
 **Step 2: PullUp explores and generates**
 
 PullUp will:
+
 1. Read documentation (if provided) to extract context
 2. Explore your application with Playwright
 3. Discover pages, forms, and interactive elements
@@ -175,24 +185,28 @@ PullUp creates a new skill directory:
 During exploration, PullUp identifies:
 
 ### Pages
+
 - All accessible URLs
 - Page titles and purposes
 - Navigation structure
 - Page types (form, list, detail, etc.)
 
 ### Forms
+
 - Input fields with names and types
 - Buttons and submit actions
 - Validation requirements
 - Expected outcomes
 
 ### Interactive Elements
+
 - Buttons and their actions
 - Links and navigation
 - Modals and popups
 - Dynamic content areas
 
 ### User Flows
+
 - Login/logout patterns
 - Multi-step processes (signup, checkout, etc.)
 - Navigation paths between pages
@@ -211,24 +225,117 @@ PullUp uses intelligent exploration:
 
 ## Configuration Options
 
-Control exploration behavior:
+PullUp uses command-line options for configuration. The primary options are:
 
-```json
-{
-  "exploration": {
-    "maxDepth": 3,
-    "maxPages": 50,
-    "timeout": 30000,
-    "waitForNetworkIdle": true,
-    "followExternalLinks": false
-  },
-  "analysis": {
-    "detectFramework": true,
-    "captureScreenshots": true,
-    "analyzeAccessibility": false
+### Primary Options
+
+**--docs <path>** (Recommended)
+- Path to documentation file or folder
+- PullUp automatically extracts:
+  - URLs (http://localhost:3000, etc.)
+  - Page paths (/login, /dashboard, etc.)
+  - Credentials (test emails and passwords)
+  - Features (from headings, bullet points)
+  - Important notes and context
+- Supports: `.md`, `.txt`, `.markdown`, `.json`, `.rst`, `.org`, `.adoc` files
+- Can be a single file or entire folder (reads recursively)
+
+**--prompt <text>**
+- Additional instructions or guidance for exploration
+- Use to focus on specific features or areas
+- Provide context about what's most important to test
+- Examples:
+  - "Focus on admin features"
+  - "Pay special attention to the checkout flow"
+  - "The authentication system is the most critical part"
+
+**--name <appname>** (Required)
+- Name of your application (used for skill naming)
+
+### Additional Options
+
+**--url <url>**
+- Explicit application URL
+- Optional if provided via --docs
+- Use when you want to override or specify URL directly
+
+**--update**
+- Update an existing skill instead of creating new one
+- Re-explores application and merges with existing knowledge
+
+**--output <dir>**
+- Custom output directory for generated skill
+- Default: `~/.claude/skills/`
+
+**--verbose**
+- Enable detailed logging during exploration
+
+### Advanced Options
+
+**--max-depth <n>**
+- Maximum crawl depth (default: 3)
+
+**--max-pages <n>**
+- Maximum pages to explore (default: 50)
+
+## Generated Skill Format
+
+When PullUp generates an application-specific testing skill, the skill MUST include executable Playwright script excerpts for specific interactions. This allows Claude to directly run these scripts as part of testing workflows without having to generate the Playwright code from scratch each time.
+
+### Playwright Script Excerpts
+
+Each common interaction should have a ready-to-execute Playwright script excerpt. These excerpts should:
+
+1. **Be Complete & Runnable**: Include all necessary imports and setup
+2. **Be Interaction-Specific**: Focus on a single interaction or workflow
+3. **Use Application Data**: Reference actual selectors, URLs, and data from exploration
+4. **Include Error Handling**: Handle common failure cases
+5. **Be Well-Commented**: Explain what each step does
+
+Example format for generated skills:
+
+```markdown
+### Login Flow
+
+**Playwright Script:**
+\`\`\`javascript
+// Login to application
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  try {
+    // Navigate to login page
+    await page.goto('http://localhost:3000/login');
+
+    // Fill login form
+    await page.fill('input[name="email"]', 'test@example.com');
+    await page.fill('input[name="password"]', 'testpass123');
+
+    // Submit form
+    await page.click('button[type="submit"]');
+
+    // Wait for navigation
+    await page.waitForURL('**/dashboard');
+
+    console.log('✅ Login successful');
+  } catch (error) {
+    console.error('❌ Login failed:', error.message);
+  } finally {
+    await browser.close();
   }
-}
+})();
+\`\`\`
 ```
+
+This allows Claude to:
+- Directly execute these scripts for testing
+- Modify them for specific test cases
+- Combine multiple scripts for complex workflows
+- Use them as templates for similar interactions
 
 ## Using Generated Skills
 
@@ -241,6 +348,7 @@ Once created, use generated skills naturally:
 ```
 
 The generated skill already knows:
+
 - Application URL
 - Page structure
 - Element selectors
@@ -250,6 +358,7 @@ The generated skill already knows:
 ## Skill Composability
 
 Generated skills reference the base Playwright skill:
+
 - Don't duplicate execution logic
 - Focus on application knowledge
 - Leverage Playwright's full capabilities
@@ -260,21 +369,27 @@ Generated skills reference the base Playwright skill:
 Extend PullUp with specialized analyzers:
 
 ### Security Extension
+
 Adds security testing patterns:
+
 - XSS vulnerability checks
 - SQL injection tests
 - Authentication bypass attempts
 - Security header verification
 
 ### Accessibility Extension
+
 Adds accessibility testing:
+
 - ARIA label verification
 - Keyboard navigation tests
 - Screen reader compatibility
 - Color contrast checks
 
 ### Performance Extension
+
 Adds performance benchmarks:
+
 - Page load timing
 - Resource size analysis
 - Rendering performance
@@ -339,6 +454,7 @@ PullUp provides detailed feedback:
 ## Troubleshooting
 
 **Skill generation fails:**
+
 ```bash
 cd $SKILL_DIR && npm run setup
 ```
@@ -355,6 +471,7 @@ Add them to your documentation files or use --prompt to specify them
 ## Example Workflow
 
 **Initial Setup:**
+
 ```
 User: "Create a testing skill for my app at localhost:3000 called todoapp"
 
@@ -375,6 +492,7 @@ You can now use: "Test the todo creation flow using todoapp-testing"
 ```
 
 **Using Generated Skill:**
+
 ```
 User: "Use todoapp-testing to verify login works"
 
@@ -390,6 +508,7 @@ Login test passed ✅
 ```
 
 **Updating After Changes:**
+
 ```
 User: "We added a calendar view, update todoapp-testing skill"
 
@@ -407,27 +526,31 @@ Updated todoapp-testing skill:
 
 ## Command Reference
 
+**Primary Usage:**
 ```bash
 # Recommended: With documentation
 node execute.js --name <appname> --docs <file-or-folder>
 
 # With guidance prompt
-node execute.js --name <appname> --docs ./docs --prompt "Focus on X feature"
-
-# Just URL
-node execute.js --name <appname> --url <url>
+node execute.js --name <appname> --docs <path> --prompt "Focus on X feature"
 
 # Update existing skill
 node execute.js --name <appname> --update
+```
 
+**Additional Options:**
+```bash
 # Custom output directory
-node execute.js --name <appname> --docs ./docs --output ~/.claude/skills/
-
-# Custom exploration settings
-node execute.js --name <appname> --docs ./docs --max-depth 5 --max-pages 100
+node execute.js --name <appname> --docs <path> --output ~/.claude/skills/
 
 # Verbose output
-node execute.js --name <appname> --docs ./docs --verbose
+node execute.js --name <appname> --docs <path> --verbose
+
+# Advanced: Custom exploration settings
+node execute.js --name <appname> --docs <path> --max-depth 5 --max-pages 100
+
+# Fallback: Just URL (if no documentation)
+node execute.js --name <appname> --url <url>
 ```
 
 ## Notes
